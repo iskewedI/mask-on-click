@@ -2,7 +2,8 @@
 
 /input/
 
-/pretrained/*
+/pretrained/*.pth
+!pretrained
 
 .vscode/*
 .vscode/settings.json

@@ -6,12 +6,14 @@ import numpy as np
 from memoization import cached
 from segment_anything import sam_model_registry, SamAutomaticMaskGenerator, SamPredictor
 from src.utils.perf_fn import measure_performance
+import modules.scripts as scripts
 
 logger = logging.getLogger(__name__)
 
-sam_checkpoint = os.path.join("pretrained", "sam_vit_h_4b8939.pth")
-onnx_model = os.path.join("pretrained", "model.onnx")
-quantized_onnx_model = os.path.join("pretrained", "model_quantized.onnx")
+sam_checkpoint = os.path.join(scripts.basedir(), "pretrained", "sam_model.pth")
+quantized_onnx_model = os.path.join(
+    scripts.basedir(), "pretrained", "model_quantized.onnx"
+)
 
 model_type = "vit_h"
 device = "cuda"

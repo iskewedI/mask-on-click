@@ -3,11 +3,12 @@ import gradio as gr
 import os
 import json
 from src.utils.static import Setting
+import modules.scripts as scripts
 
 logger = logging.getLogger(__name__)
 
 last_params = {}
-params_file_path = os.path.join("last_params.json")
+params_file_path = os.path.join(scripts.basedir(), "last_params.json")
 
 
 def load_params():

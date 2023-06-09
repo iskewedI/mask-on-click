@@ -1,6 +1,6 @@
 import logging
 import json
-from src.api.stable_diff import stable_diff
+from src.api import stable_diff
 from src.utils.static import INPAINTING_FILL_METHODS
 
 logger = logging.getLogger(__name__)
