@@ -1,7 +1,0 @@
-- Creating a new project:
-    - DESIGNS:
-        - Define standarizations:
-            - Which standard library to manage images? cv2, PLT, PIL
-            - RGB or BGR? Alpha or not?
-            - Which image shape order will be used? H x W x D || W x H x D || D x W x H etc
-            - Arrays or np.arrays()
