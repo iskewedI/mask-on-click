@@ -1,25 +1,18 @@
 import logging
-import time
 import numpy as np
 import cv2
 import gradio as gr
-from src.utils import gradio_fn, masks_fn, img_fn, thread_fn
+from src.utils import gradio_fn, masks_fn, img_fn
 from src.utils.static import TABS
-from src.api import stable_diff
-from src.inpaint import inpaint
 from src.segmentator import (
     gen_image_embedding,
     segment_ONNX_point,
     segment_automatic,
     segment_boxes,
 )
-from src.upscale import upscale_img
 import os
-from src.UI import UIConfig
-from src.utils.static import Setting
 from src.utils.logging import config_logs
 import modules.scripts as scripts
-import PIL
 
 config_logs()
 logger = logging.getLogger(__name__)
@@ -27,8 +20,6 @@ logger = logging.getLogger(__name__)
 
 # Configuration
 styles_css = os.path.join(scripts.basedir(), "styles.css")
-
-UIConfig.load_params()
 
 # Global variables
 # Tabs
@@ -47,17 +38,6 @@ original_image = None
 image_segmentated = None
 img_embedding = None
 
-out_path = os.path.join(scripts.basedir(), "out")
-if not os.path.exists(out_path):
-    os.mkdir(out_path)
-
-# SD Inpaint input data
-inpaint_input_data = {
-    "prompt": UIConfig.get_param("prompt"),
-    "negative_prompt": UIConfig.get_param("prompt_negative"),
-}
-
-tmp_img_path = os.path.join(scripts.basedir(), "temp.png")
 
 def get_current_masks_img():
     masks = None
@@ -79,6 +59,8 @@ def get_current_masks_img():
     joined_masks = masks_fn.join_masks_img(masks)
 
     return joined_masks
+
+
 # Set globals to original values
 def clean_globals():
     global segmented_masks
@@ -104,22 +86,6 @@ def set_current_tab(tab: TABS):
     global current_tab
 
     current_tab = tab
-
-
-# Get current SD operation progress
-def get_sd_progress():
-    result = stable_diff.get_progress()
-
-    if "error" in result:
-        logger.exception("Failed to get current progress => ", result)
-        return None
-
-    if not result["current_image"]:
-        return None
-
-    current_img = img_fn.b642img(result["current_image"])
-
-    return current_img
 
 
 # Update the mask overlay on the image
@@ -190,19 +156,9 @@ def handle_image_upload(img, convert_color=True):
     return input_img
 
 
-# Handle the "send to input" button clicks
-def handle_send_to_input(out_img):
-    # We don't want to convert colors in this case as they're already in correct form
-    handle_image_upload(out_img, False)
-
-    return out_img, out_img
-
-
-def create_ui(segment_script, opts):
-    with gr.Blocks(css=styles_css) as demo:
+def create_ui(opts):
+    with gr.Blocks(css=styles_css):
         # with gr.Row():
-        # get_img_from_inpaint = gr.Button("Get image from inpaint")
-
         ## Tabs
         with gr.Tab("Point segmentation") as points_tab:
             image_clicker = gr.Image(
@@ -231,40 +187,9 @@ def create_ui(segment_script, opts):
                 with gr.Column():
                     with gr.Row():
                         segmented_image = gr.Image(tool=None, label="Segmentations")
-                    with gr.Row():
-                        segmented_boxs_image = gr.Image(
-                            label="Boxes generated",
-                            elem_classes="gr-img-segm-result-boxes",
-                        )
-
-        ## Inpainting results
-        # with gr.Column():
-        # Internal settings
-        # config_elements = UIConfig.get_ui()
-
-        # Text settings
-        # with gr.Row():
-        #     prompt_text = gr.Textbox(
-        #         inpaint_input_data["prompt"],
-        #         label="Prompt",
-        #     )
-        #     prompt_negative = gr.Textbox(
-        #         inpaint_input_data["negative_prompt"], label="Negative prompt"
-        #     )
-
-        # inpaint_button = gr.Button("Inpaint", variant="primary")
-
-        # result_image = gr.Image(
-        #     label="Output",
-        #     elem_classes="gr-img",
-        #     interactive=False,
-        # )
-
-        # send_out_to_in_button = gr.Button("Send to input")
 
         # Handles when the user clicks on the image on the click segmentation tab
-
-        def handle_image_click(img, evt: gr.SelectData):
+        def segment_point_click(img, evt: gr.SelectData):
             global drawn_masks_per_id
 
             points_coords = (evt.index[0], evt.index[1])
@@ -353,162 +278,7 @@ def create_ui(segment_script, opts):
                 cv2.rectangle(box_img, (b[0], b[1]), (b[2], b[3]), (255, 0, 0), 3)
 
             logger.info("Segmentation completed.")
-            return masked_image, box_img
-
-        def start_inpainting(original_img, prompt_text, prompt_negative):
-            global segmented_masks
-            global selected_mask_indices
-
-            input_img = original_img
-
-            resized_img = cv2.resize(input_img, (512, 512))
-            logger.info(
-                f"Inpainting. Resizing from {input_img.shape} to {resized_img.shape}"
-            )
-
-            masks = None
-
-            if current_tab == TABS.POINT:
-                masks = [m["mask"] for m in drawn_masks_per_id.values()]
-            elif current_tab == TABS.MASK:
-                masks = [
-                    value
-                    for index, value in enumerate(segmented_masks)
-                    if index in selected_mask_indices
-                ]
-
-            if len(masks) == 0:
-                logger.warning("No masks selected. Please segment the image.")
-                return
-
-            logger.info("Joining masks...")
-            joined_masks = masks_fn.join_masks_img(masks)
-
-            # Convert to PIL Image the BGR cv2 image (the output will be RGB as PIL Image uses)
-            PIL_img = img_fn.convert_from_cv2_to_image(
-                cv2.cvtColor(resized_img, cv2.COLOR_RGB2BGR)
-            )
-            b64_img = img_fn.img2b64(PIL_img)
-
-            logger.info("Preprocessing image...")
-            mask_preprocessed = masks_fn.preprocess_mask(
-                joined_masks, (resized_img.shape[1], resized_img.shape[0])
-            )
-            b64_mask = img_fn.MAT2b64(mask_preprocessed)
-
-            config = {
-                Setting.Steps.value: UIConfig.get_cfg(Setting.Steps),
-                Setting.InpaintingFill.value: UIConfig.get_cfg(Setting.InpaintingFill),
-                Setting.DenoisingStrength.value: UIConfig.get_cfg(
-                    Setting.DenoisingStrength
-                ),
-                Setting.DenoisingStrength.value: UIConfig.get_cfg(
-                    Setting.DenoisingStrength
-                ),
-                Setting.ResizeMode.value: UIConfig.get_cfg(Setting.ResizeMode),
-                Setting.ResizeMode.value: UIConfig.get_cfg(Setting.ResizeMode),
-                Setting.InpaintFullResPadding.value: UIConfig.get_cfg(
-                    Setting.InpaintFullResPadding
-                ),
-                "width": int(resized_img.shape[1]),
-                "height": int(resized_img.shape[0]),
-                "save_images": UIConfig.get_cfg(Setting.SaveOutput),
-                "include_init_images": UIConfig.get_cfg(Setting.SaveOutput),
-            }
-
-            logger.info("Inpainting image...")
-            inpaint_res = inpaint(
-                prompt_text, prompt_negative, b64_img, b64_mask, config
-            )
-            if inpaint_res is None:
-                return
-
-            logger.info("Inpainting completed. ")
-            image_result = img_fn.b642MAT(inpaint_res["imgb64"])
-
-            image_id = inpaint_res["seed"]
-
-            resized_result = cv2.resize(image_result, np.flip(original_image.shape[:2]))
-            upscaled_result = None
-
-            if UIConfig.get_cfg(Setting.SaveParams):
-                save_data = {"prompt": prompt_text, "prompt_negative": prompt_negative}
-                UIConfig.save_params(save_data)
-
-            if UIConfig.get_cfg(Setting.SaveOutput):
-                logger.info("Saving images")
-                image_result_write = cv2.cvtColor(resized_result, cv2.COLOR_BGR2RGB)
-
-                cv2.imwrite(f"{out_path}/{image_id}_inpaint.png", image_result_write)
-                cv2.imwrite(f"{out_path}/{image_id}_mask.png", mask_preprocessed)
-
-            if UIConfig.get_cfg(Setting.UpscaleOutput):
-                # upscale_to = (1024, 1280)
-                upscaled_result = upscale_img(
-                    img_fn.MAT2b64(resized_result),
-                    # {
-                    #     "resize_mode": 1,
-                    #     "upscaling_resize_w": upscale_to[0],
-                    #     "upscaling_resize_h": upscale_to[1],
-                    #     "upscaling_crop": False,
-                    # },
-                )
-
-                upscaled_result = cv2.cvtColor(upscaled_result, cv2.COLOR_BGR2RGB)
-
-                if UIConfig.get_cfg(Setting.SaveOutput):
-                    upscaled_result_write = cv2.cvtColor(
-                        upscaled_result, cv2.COLOR_BGR2RGB
-                    )
-
-                    cv2.imwrite(
-                        f"{out_path}/{image_id}_upscaled.png", upscaled_result_write
-                    )
-
-                logger.info("Saving and finishing upscaled image")
-
-                return upscaled_result
-
-            return resized_result
-
-        def inpainting_generator(prompt_text, prompt_negative):
-            operation = thread_fn.ThreadOperation(
-                lambda: start_inpainting(original_image, prompt_text, prompt_negative)
-            )
-            operation.start()
-
-            last_progress_img = None
-            # Loop and check progress periodically.
-            while True:
-                try:
-                    progress_image = get_sd_progress()
-                except:
-                    logger.exception(
-                        "Error trying to get sd progress. Finishing generator."
-                    )
-                    break
-
-                if operation.error:
-                    logger.warning(
-                        "Finishing generator due to an error inside the thread..."
-                    )
-                    yield last_progress_img
-                    break
-                if operation.result is not None:
-                    logger.info("Finishing operation...")
-                    yield operation.result
-                    break
-                else:
-                    if progress_image is not None and not np.array_equal(
-                        progress_image, last_progress_img
-                    ):
-                        # New image received
-                        last_progress_img = progress_image
-                        yield progress_image
-                    elif last_progress_img:
-                        yield last_progress_img
-
-                time.sleep(1.5)
+            return masked_image
 
         # UI Movements
         points_tab.select(lambda: set_current_tab(TABS.POINT))
@@ -535,7 +305,7 @@ def create_ui(segment_script, opts):
         segment_button.click(
             start_segmentation,
             inputs=image_masker,
-            outputs=[segmented_image, segmented_boxs_image],
+            outputs=segmented_image,
         )
 
         # On Mask selection in Segmented Image
@@ -553,53 +323,16 @@ def create_ui(segment_script, opts):
 
         # On mask click
         image_clicker.select(
-            handle_image_click,
+            segment_point_click,
             inputs=image_clicker,
             outputs=image_clicker,
             show_progress=False,
         )
 
-        # inpaint_button.click(
-        #     inpainting_generator,
-        #     [prompt_text, prompt_negative],
-        #     result_image,
-        # )
-
-        # prompt_text.submit(
-        #     inpainting_generator, [prompt_text, prompt_negative], result_image
-        # )
-
-        # send_out_to_in_button.click(
-        #     handle_send_to_input,
-        #     inputs=result_image,
-        #     outputs=[image_clicker, image_masker],
-        # )
-
-        # get_img_from_inpaint.click(
-        #     handle_get_from_inpaint,
-        #     outputs=image_clicker,
-        #     _js="() => getImgFromInpaintTab()",
-        # )
-
-        return [
-            demo,
-            [
-                image_clicker,
-                multimask_output_check,
-                image_masker,
-                segment_button,
-                segmented_image,
-                segmented_boxs_image,
-                # *config_elements,
-                # get_img_from_inpaint,
-            ],
-        ]
-
-
-if __name__ == "__main__":
-    demo, _ = create_ui()
-
-    # Queue enabled to use generators
-    demo.queue()
-
-    demo.launch(server_port=7861)
+        return (
+            image_clicker,
+            multimask_output_check,
+            image_masker,
+            segment_button,
+            segmented_image,
+        )

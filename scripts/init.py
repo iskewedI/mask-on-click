@@ -14,7 +14,7 @@ class SegmentExtension(scripts.Script):
         return is_img2img
 
     def ui(self, is_img2img):
-        _, elements = create_ui(self, opts)
+        elements = create_ui(opts)
 
         return elements
 

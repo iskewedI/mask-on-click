@@ -2,7 +2,6 @@ import logging
 import gradio as gr
 import os
 import json
-from src.utils.static import Setting
 import modules.scripts as scripts
 
 logger = logging.getLogger(__name__)
@@ -48,70 +47,7 @@ def get_cfg(name):
 
 
 # Each array is a new row
-config = [
-    [
-        {
-            "name": Setting.SaveOutput,
-            "component": gr.Checkbox,
-            "value": True,
-            "label": "Save output image",
-        },
-        {
-            "name": Setting.SaveParams,
-            "component": gr.Checkbox,
-            "value": True,
-            "label": "Save generation params",
-        },
-        {
-            "name": Setting.UpscaleOutput,
-            "component": gr.Checkbox,
-            "value": False,
-            "label": "Upscale the generated image.",
-        },
-    ],
-    [
-        {
-            "name": Setting.Steps,
-            "component": gr.Number,
-            "value": 10,
-            "label": "Steps",
-            "params": {"precision": 0},
-        },
-        {
-            "name": Setting.InpaintingFill,
-            "component": gr.Number,
-            "value": 0,
-            "label": "Inpainting fill mode",
-            "params": {"precision": 0},
-        },
-        {
-            "name": Setting.DenoisingStrength,
-            "component": gr.Number,
-            "value": 0.7,
-            "label": "Denoising strength",
-        },
-        {
-            "name": Setting.ResizeMode,
-            "component": gr.Number,
-            "value": 0,
-            "label": "Resize mode",
-            "params": {"precision": 0},
-        },
-        {
-            "name": Setting.InpaintFullRes,
-            "component": gr.Checkbox,
-            "value": True,
-            "label": "Inpainting full res flag",
-        },
-        {
-            "name": Setting.InpaintFullResPadding,
-            "component": gr.Number,
-            "value": 32,
-            "label": "Inpainting full res padding (px)",
-            "params": {"precision": 0},
-        },
-    ],
-]
+config = [[]]
 
 
 def change_cfg(name, rowIndex, value):

@@ -131,7 +131,7 @@ def segment_ONNX_point(image, embedding, point_cords):
         "orig_im_size": torch.tensor(image.shape[:2], dtype=torch.float32).numpy(),
     }
 
-    masks, _, low_res_logits = ort_session.run(None, ort_inputs)
+    masks, _, _ = ort_session.run(None, ort_inputs)
     masks = masks > sam_predictor.model.mask_threshold
 
     return masks
