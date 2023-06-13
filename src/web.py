@@ -14,14 +14,17 @@ import os
 from src.utils.logging import config_logs
 import modules.scripts as scripts
 
-config_logs()
+scripts_basedir = scripts.basedir()
+
+tracelogs_path = os.path.join(scripts_basedir, "trace.log")
+config_logs(tracelogs_path)
+
 logger = logging.getLogger(__name__)
 
 
 # Configuration
-styles_css = os.path.join(scripts.basedir(), "styles.css")
+styles_css = os.path.join(scripts_basedir, "styles.css")
 
-# Global variables
 # Tabs
 current_tab = TABS.POINT
 

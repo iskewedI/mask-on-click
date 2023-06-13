@@ -14,8 +14,8 @@ class LogFilter(logging.Filter):
         return True
 
 
-def config_logs():
-    logging.basicConfig(filename="trace.log", encoding="utf-8", level=logging.INFO)
+def config_logs(trace_path):
+    logging.basicConfig(filename=trace_path, encoding="utf-8", level=logging.INFO)
     filter = LogFilter()
 
     # Add filter to all handlers
