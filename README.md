@@ -32,6 +32,8 @@ pip install -r requirements.txt
 ## Usage
 After installing the extension, you can access the MaskOnClick functionality directly from the Stable Diffusion Web UI interface. Simply choose an image for editing, and you can start segmenting areas of the image with a simple click, after which you can proceed with the inpainting or any other editing operations as per your requirement.
 
+**For Auto's A111 SD WebUI**, you need to set the _--disable-safe-unpickle_ command argument to true (just add --disable-safe-unpickle to the webui-user.bat file COMMANDLINE_ARGS= line). This is because some weird behavior with SD custom torch _.load_ method and the segment anything repo.
+
 ## Built With
 - Python 3.10
 - PyTorch 2.0
