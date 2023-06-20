@@ -27,6 +27,7 @@ cd mask-on-click
 pip install -r requirements.txt
 ```
 4. Install the extension to your Stable Diffusion Web UI project following its specific extension installation guidelines.
+   You can also just clone the repo inside the Stable Diffusion WebUI extensions directory and reload the WebUI.
 
 ## Usage
 After installing the extension, you can access the MaskOnClick functionality directly from the Stable Diffusion Web UI interface. Simply choose an image for editing, and you can start segmenting areas of the image with a simple click, after which you can proceed with the inpainting or any other editing operations as per your requirement.
