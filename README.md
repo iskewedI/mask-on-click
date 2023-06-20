@@ -36,8 +36,7 @@ After installing the extension, you can access the MaskOnClick functionality dir
 
 Common process:
 
-![video](https://github.com/iskewedI/mask-on-click/assets/52925249/0754f499-c9b2-402e-8a62-b53f1a5d3575)
-
+![video](https://github.com/iskewedI/mask-on-click/assets/52925249/58faa4f4-c61c-490d-98cb-4fbdfd18e6ab)
 
 ## Built With
 - Python 3.10
