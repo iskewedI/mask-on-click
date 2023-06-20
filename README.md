@@ -14,7 +14,7 @@ To install MaskOnClick, please follow these steps:
 1. Clone the repository
 
 ```bash
-git clone [https://github.com/username/mask-on-click.git](https://github.com/iskewedI/Clothes-segmentation.git)
+git clone https://github.com/iskewedI/mask-on-click.git
 ```
 
 2. Move into the directory
