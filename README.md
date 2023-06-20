@@ -53,5 +53,5 @@ Distributed under the MIT License. See LICENSE for more information.
 Please feel free to contact if you have any questions or need further information.
 
 ## Acknowledgements
-- Automatic1111 Stable Diffusion Web UI
-- Meta's Segment Anything
+- [Automatic1111 Stable Diffusion Web UI](https://github.com/AUTOMATIC1111/stable-diffusion-webui)
+- [Meta's Segment Anything](https://github.com/facebookresearch/segment-anything)
