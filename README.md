@@ -32,7 +32,7 @@ pip install -r requirements.txt
 ## Usage
 After installing the extension, you can access the MaskOnClick functionality directly from the Stable Diffusion Web UI interface. This extension is loaded as a script (you have a dropdown below all sections like text2img and img2img to select those). Simply choose an image for editing, load the script and there you can segment the image. The mask will be automatically added to the img2img inpaint process.
 
-**For Auto's A111 SD WebUI**, you need to set the _--disable-safe-unpickle_ command argument to true (just add --disable-safe-unpickle to the webui-user.bat file COMMANDLINE_ARGS= line). This is because some weird behavior with SD custom torch _.load_ method and the segment anything repo.
+**For Auto's A1111 SD WebUI**, you need to set the _--disable-safe-unpickle_ command argument to true (just add --disable-safe-unpickle to the webui-user.bat file COMMANDLINE_ARGS= line). This is because some weird behavior with SD custom torch _.load_ method and the segment anything repo.
 
 Common process:
 
