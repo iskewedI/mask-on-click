@@ -55,6 +55,7 @@ pip install -r requirements.txt
 4. Install the extension to your Stable Diffusion Web UI project following its specific extension installation guidelines.
    You can also just clone the repo inside the Stable Diffusion WebUI extensions directory and reload the WebUI.
 
+**You need to download the default SAM model from the https://github.com/facebookresearch/segment-anything#getting-started SAM's installation process, and then put it into the _pretrained_ mask-on-click directory**
 ## Usage
 After installing the extension, you can access the MaskOnClick functionality directly from the Stable Diffusion Web UI interface. This extension is loaded as a script (you have a dropdown below all sections like text2img and img2img to select those). Simply choose an image for editing, load the script and there you can segment the image. The mask will be automatically added to the img2img inpaint process.
 
