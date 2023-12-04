@@ -12,6 +12,15 @@ if not os.path.exists(segment_anything_path):
     if not launch.is_installed("onnx"):
         launch.run(f"cd {segment_anything_path} && pip install -e .")
 
+if not launch.is_installed("onnx"):
+    launch.run_pip("install onnx", "onnx requirement for segmentation-on-click")
+
+if not launch.is_installed("onnxruntime"):
+    launch.run_pip(
+        "install onnxruntime", "onnxruntime requirement for segmentation-on-click"
+    )
+
+
 if not launch.is_installed("unique-id"):
     launch.run_pip(
         "install unique-id", "unique-id requirement for segmentation-on-click"
