@@ -9,6 +9,32 @@ This extension is extremely useful when combined with the inpainting technique p
 ### Prerequisite:
 Make sure you have Stable Diffusion Web UI installed on your system.
 
+To install as extension on Stable Diffusion WebUi from Automatic1111:
+1. Clone the repository under the **extensions** stable directory.
+
+```bash
+git clone https://github.com/iskewedI/mask-on-click.git
+```
+
+2. Move into the directory and then into the segment-anything folder
+```bash
+cd mask-on-click
+cd segment-anything
+```
+
+3. Clone Segment Anything repo here
+```bash
+git clone https://github.com/facebookresearch/segment-anything .
+```
+
+4. Install packages 
+```bash
+pip install -e .
+```
+
+5. Fully reload SD UI if you have it already opened
+
+
 To install MaskOnClick, please follow these steps:
 
 1. Clone the repository
