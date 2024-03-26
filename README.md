@@ -22,12 +22,17 @@ cd mask-on-click
 cd segment-anything
 ```
 
+2. Activate SD WebUI environment
+```bash
+path-to-sd-webui\venv\Scripts\activate.bat
+```
+
 3. Clone Segment Anything repo here
 ```bash
 git clone https://github.com/facebookresearch/segment-anything .
 ```
 
-4. Install packages 
+4. Install packages and install SAM model (read below)
 ```bash
 pip install -e .
 ```
