@@ -8,3 +8,4 @@ scikit-image
 unique-id
 pytorch
 torchvision>=0.15.2+cu118
+segment_anything
