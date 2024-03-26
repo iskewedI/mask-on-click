@@ -6,6 +6,6 @@ pandas
 matplotlib
 scikit-image
 unique-id
-pytorch
+torch
 torchvision>=0.15.2+cu118
 segment_anything
